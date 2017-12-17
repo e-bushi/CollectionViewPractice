@@ -22,19 +22,18 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         collectionView?.register(TaskHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerID")
     }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
+   var tasks = ["Buy groceries"]
 
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 20
+        return tasks.count
     }
     
     
     //sets the parameters for the header
     override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        return collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "headerID", for: indexPath)
+        let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "headerID", for: indexPath) as! TaskHeader
+        header.homeController = self
+        return header
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
@@ -46,21 +45,27 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     //sets the parameters for each collection view cell
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let TaskCell = collectionView.dequeueReusableCell(withReuseIdentifier: "cellId", for: indexPath) as! TaskCell
-        TaskCell.nameLabel.text = "Sample Task \(indexPath.item)"
+        TaskCell.nameLabel.text = tasks[indexPath.item]
         return TaskCell
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: view.frame.width, height: 50)
     }
+    
+    
+    func addNewTask(taskName: String) {
+        tasks.append(taskName)
+        collectionView?.reloadData()
+    }
 
 }
 
 
 
-//CUSTOM HEADER CLASS
-class TaskHeader: UICollectionViewCell {
-    
+
+
+class baseCell: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupViews()
@@ -70,27 +75,55 @@ class TaskHeader: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    func setupViews(){}
+}
+
+//CUSTOM HEADER CLASS
+class TaskHeader: baseCell {
     
-    
-    let nameLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Header"
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
+    var homeController: HomeController?
+
+    let taskNameTextField: UITextField = {
+        let textField = UITextField()
+        textField.placeholder = "Enter Task Name"
+        textField.translatesAutoresizingMaskIntoConstraints = false
+        textField.borderStyle = .roundedRect
+        return textField
     }()
     
-    func setupViews() {
-        addSubview(nameLabel)
+    
+    let addNewTask: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Add Task", for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    override func setupViews() {
+        addSubview(taskNameTextField)
+        addSubview(addNewTask)
         
+        addNewTask.addTarget(self, action: Selector(("addTask")), for: .touchUpInside)
         
-        addConstraint(NSLayoutConstraint.constraints(withVisualFormat: "H:|-8-[v0]-8-|",
-                                                     options: NSLayoutFormatOptions(),
-                                                     metrics: nil,
-                                                     views: ["v0": nameLabel])[0])
-        addConstraint(NSLayoutConstraint.constraints(withVisualFormat: "V:|-8-[v0]-8-|",
-                                                     options: NSLayoutFormatOptions(),
-                                                     metrics: nil,
-                                                     views: ["v0": nameLabel])[0])
+        addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-8-[v0]-[v1(80)]-8-|",
+                                                      options: NSLayoutFormatOptions(),
+                                                      metrics: nil,
+                                                      views: ["v0": taskNameTextField, "v1": addNewTask]))
+        
+        addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-24-[v0]-24-|",
+                                                      options: NSLayoutFormatOptions(),
+                                                      metrics: nil,
+                                                      views: ["v0": taskNameTextField]))
+        
+        addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-8-[v0]-8-|",
+                                                      options: NSLayoutFormatOptions(),
+                                                      metrics: nil,
+                                                      views: ["v0": addNewTask]))
+    }
+    
+    func addTask() {
+        homeController?.addNewTask(taskName: taskNameTextField.text!)
+        taskNameTextField.text = ""
     }
 }
 
@@ -98,18 +131,7 @@ class TaskHeader: UICollectionViewCell {
 
 
 //CUSTOM CELL CLASS
-class TaskCell: UICollectionViewCell {
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        setupViews()
-    }
-    
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    
+class TaskCell: baseCell {
     
     let nameLabel: UILabel = {
         let label = UILabel()
@@ -118,7 +140,7 @@ class TaskCell: UICollectionViewCell {
         return label
     }()
     
-    func setupViews() {
+    override func setupViews() {
         addSubview(nameLabel)
         
     
