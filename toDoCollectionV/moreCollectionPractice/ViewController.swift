@@ -92,7 +92,7 @@ class TaskHeader: baseCell {
     }()
     
     
-    let addNewTask: UIButton = {
+    let addTaskToCollection: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Add Task", for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -101,14 +101,14 @@ class TaskHeader: baseCell {
     
     override func setupViews() {
         addSubview(taskNameTextField)
-        addSubview(addNewTask)
+        addSubview(addTaskToCollection)
         
-        addNewTask.addTarget(self, action: Selector(("addTask")), for: .touchUpInside)
+        addTaskToCollection.addTarget(self, action: #selector(self.addTask) , for: .touchUpInside)
         
         addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-8-[v0]-[v1(80)]-8-|",
                                                       options: NSLayoutFormatOptions(),
                                                       metrics: nil,
-                                                      views: ["v0": taskNameTextField, "v1": addNewTask]))
+                                                      views: ["v0": taskNameTextField, "v1": addTaskToCollection]))
         
         addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-24-[v0]-24-|",
                                                       options: NSLayoutFormatOptions(),
@@ -118,10 +118,10 @@ class TaskHeader: baseCell {
         addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-8-[v0]-8-|",
                                                       options: NSLayoutFormatOptions(),
                                                       metrics: nil,
-                                                      views: ["v0": addNewTask]))
+                                                      views: ["v0": addTaskToCollection]))
     }
     
-    func addTask() {
+    @objc func addTask() {
         homeController?.addNewTask(taskName: taskNameTextField.text!)
         taskNameTextField.text = ""
     }
